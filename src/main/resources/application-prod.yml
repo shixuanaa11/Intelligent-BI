@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: axuan
+    password: 123456
+    url: jdbc:mysql://43.138.252.106:3306/axuan
+  session:
+#    设置令牌的失效时间 1天86400秒
+    timeout: 86400
+server:
+  port: 8081
+  address: 0.0.0.0
