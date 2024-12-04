@@ -1,18 +1,24 @@
 package com.example.intelligentbibackend.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.intelligentbibackend.common.BaseResponse;
 import com.example.intelligentbibackend.common.ErrorCode;
 import com.example.intelligentbibackend.common.ResultUtils;
+import com.example.intelligentbibackend.constant.CommonConstant;
 import com.example.intelligentbibackend.exception.BesinessException;
 import com.example.intelligentbibackend.manager.AiManager;
 import com.example.intelligentbibackend.model.domain.Chart;
 import com.example.intelligentbibackend.model.domain.User;
+import com.example.intelligentbibackend.model.request.chart.ChartQueryRequest;
 import com.example.intelligentbibackend.model.request.chart.GenChartByAiRequest;
 import com.example.intelligentbibackend.model.vo.BiResponse;
 import com.example.intelligentbibackend.service.ChartService;
 import com.example.intelligentbibackend.service.UserService;
 import com.example.intelligentbibackend.utils.ExcelUtils;
+import com.example.intelligentbibackend.utils.SqlUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/chart")
-@CrossOrigin(origins = {"http://localhost:5178"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5173"},allowCredentials = "true")
 public class ChartController {
 
     @Resource
@@ -190,5 +196,64 @@ public class ChartController {
 //        biResponse.setGenResult(genResult);
 //        biResponse.setChartId(chart.getId());
 //        return ResultUtils.success(biResponse);
+    }
+
+    /**
+     * 查询图表（分页）
+     * @param chartQueryRequest
+     * @param request
+     * @return
+     */
+
+    @PostMapping("/my/list/page")
+    public BaseResponse<Page<Chart>> listMyChartByPage(@RequestBody ChartQueryRequest chartQueryRequest,
+                                                       HttpServletRequest request) {
+        if (chartQueryRequest == null) {
+            throw new BesinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getloginuser(request);
+        chartQueryRequest.setUserId(loginUser.getId());
+        long current = chartQueryRequest.getCurrent();
+        long size = chartQueryRequest.getPageSize();
+        // 限制爬虫
+//        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        if (size>20){
+            throw new BesinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Page<Chart> chartPage = chartService.page(new Page<>(current, size),
+                getQueryWrapper(chartQueryRequest));
+        return ResultUtils.success(chartPage);
+    }
+
+
+
+    /**
+     * 获取查询包装类
+     *
+     * @param chartQueryRequest
+     * @return
+     */
+    private QueryWrapper<Chart> getQueryWrapper(ChartQueryRequest chartQueryRequest) {
+        QueryWrapper<Chart> queryWrapper = new QueryWrapper<>();
+        if (chartQueryRequest == null) {
+            return queryWrapper;
+        }
+        Long id = chartQueryRequest.getId();
+        String name = chartQueryRequest.getName();
+        String goal = chartQueryRequest.getGoal();
+        String chartType = chartQueryRequest.getChartType();
+        Long userId = chartQueryRequest.getUserId();
+        String sortField = chartQueryRequest.getSortField();
+        String sortOrder = chartQueryRequest.getSortOrder();
+
+        queryWrapper.eq(id != null && id > 0, "id", id);
+        queryWrapper.like(StringUtils.isNotBlank(name), "chartName", name);
+        queryWrapper.eq(StringUtils.isNotBlank(goal), "goal", goal);
+        queryWrapper.eq(StringUtils.isNotBlank(chartType), "chartType", chartType);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
+        queryWrapper.eq("isDelete", false);
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
+        return queryWrapper;
     }
 }

@@ -7,6 +7,7 @@ import com.example.intelligentbibackend.exception.BesinessException;
 import com.example.intelligentbibackend.model.domain.User;
 import com.example.intelligentbibackend.model.request.user.UserLoginRequest;
 import com.example.intelligentbibackend.model.request.user.UserRegisterRequest;
+import com.example.intelligentbibackend.model.vo.LoginUserVO;
 import com.example.intelligentbibackend.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,11 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:5178"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5173"},allowCredentials = "true")
 public class UserController {
 
-//    @Resource
-//    private ManageruserService manageruserService;
+
 
     @Resource
     private UserService userService;
@@ -52,7 +52,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
-    public BaseResponse<User>  login(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+    public BaseResponse<LoginUserVO>  login(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
@@ -62,7 +62,7 @@ public class UserController {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
 //        返回一个登录对象的脱敏数据
-        User user = userService.userLogin(userAccount, userPassword, request);
+        LoginUserVO user = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(user);
     }
 
@@ -75,6 +75,18 @@ public BaseResponse<Integer> logout( HttpServletRequest request) {
     int result = userService.userLogout(request);
     return ResultUtils.success(result);
 }
+
+    /**
+     * 获取当前登录用户
+     *
+     * @param request
+     * @return
+     */
+    @GetMapping("/get/login")
+    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
+        User user = userService.getloginuser(request);
+        return ResultUtils.success(userService.getLoginUserVO(user));
+    }
 
     //       增删改查
 //        查
