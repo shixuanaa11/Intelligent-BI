@@ -62,7 +62,7 @@
   </a-row>
 </template>
 <script setup>
-import { reactive, ref, toRef, watchEffect } from 'vue'
+import { ref, computed } from 'vue'
 import { UploadOutlined } from '@ant-design/icons-vue'
 import { Divider, message } from 'ant-design-vue'
 import Genchart from '@/components/chart.vue'
@@ -70,6 +70,7 @@ import Genchart from '@/components/chart.vue'
 import { genChartByAi } from '@/api/chart'
 // pinia
 import { useChartStore } from '@/stores/chart'
+import { storeToRefs } from 'pinia'
 const chartStore = useChartStore()
 // 按钮加载
 const loading = ref(false)
@@ -80,7 +81,7 @@ const formState = ref({
   ChartType: '',
 })
 // ai生成结果
-const result = ref('')
+const { AIGENRESULT: result } = storeToRefs(chartStore)
 
 // ai生成的图表
 // const chartData = chartStore.AIGENCHART
@@ -105,14 +106,15 @@ const onFinish = async () => {
     message.success('提交成功')
     // result.value = res.data.aiGenResult
     chartStore.SET_AIGENRESULT(res.data.aiGenResult)
-    result.value = res.data.aiGenResult
+    // result.value = res.data.aiGenResult
     chartStore.SET_AIGENCHART(JSON.parse(res.data.aiGenChart))
     console.log('结论数据', res.data.aiGenResult)
     console.log('pinia的结论数据', chartStore.AIGENRESULT)
+    loading.value = false
   } else {
     message.error('提交失败')
+    loading.value = false
   }
-  loading.value = false
 }
 
 const onFinishFailed = (errorInfo) => {
@@ -151,12 +153,5 @@ const resetFields = () => {
     ChartType: '',
   }
 }
-// const handleChange = (info) => {
-//   if (info.file.status === 'done') {
-//     message.success(`${info.file.name} 上传成功`)
-//   } else if (info.file.status === 'error') {
-//     message.error(`${info.file.name} 上传失败.`)
-//   }
-// }
 </script>
 <style scoped></style>

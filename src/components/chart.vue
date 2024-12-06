@@ -7,11 +7,12 @@ import VChart from 'vue-echarts'
 import { computed, watchEffect } from 'vue'
 // pinia
 import { useChartStore } from '@/stores/chart'
+import { storeToRefs } from 'pinia'
 
-const chartStore = useChartStore()
+const { AIGENCHART: chartStore } = storeToRefs(useChartStore())
 
 const option = computed(() => {
-  return chartStore.AIGENCHART
+  return chartStore.value
 })
 watchEffect(() => {
   chartStore

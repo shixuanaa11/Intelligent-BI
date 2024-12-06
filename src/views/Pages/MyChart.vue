@@ -25,7 +25,27 @@
             </template>
 
             <template #title>
-              <a-typography-title :level="5"> {{ item?.chartName }}</a-typography-title>
+              <a-flex style="width: 100%" justify="space-between">
+                <a-typography-title :level="5"> {{ item?.chartName }}</a-typography-title>
+                <a-dropdown>
+                  <a @click.prevent>
+                    <EllipsisOutlined :style="{ fontSize: '20px' }" />
+                  </a>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item>
+                        <a href="javascript:;">查看JS源码</a>
+                      </a-menu-item>
+                      <a-menu-item>
+                        <a href="javascript:;">下载</a>
+                      </a-menu-item>
+                      <a-menu-item>
+                        <a href="javascript:;" @click="deleteChart(item.id)">删除</a>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </a-flex>
             </template>
 
             <template #avatar><a-avatar :src="item.avatar" /></template>
@@ -47,8 +67,8 @@
 </template>
 <script setup>
 import { listMyChartByPage } from '@/api/chart'
-import { message } from 'ant-design-vue'
-
+import { message, Modal } from 'ant-design-vue'
+import { EllipsisOutlined } from '@ant-design/icons-vue'
 import { onMounted, ref } from 'vue'
 
 const chartData = ref({
@@ -111,6 +131,30 @@ const activeKey = ref(['1'])
 // 搜索
 const onSearch = () => {
   loadData()
+}
+// 删除图表
+const deleteChart = (id) => {
+  console.log('删除图表 ID', id)
+  Modal.confirm({
+    title: '删除图表',
+    // icon: h(ExclamationCircleOutlined),
+    content: '你确定要删除该图表?',
+    okText: '确认',
+    cancelText: '取消',
+    async onOk() {
+      try {
+        return (
+          await new Promise((resolve, reject) => {
+            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000)
+          }),
+          message.success('删除成功')
+        )
+      } catch {
+        return console.log('Oops errors!')
+      }
+    },
+    onCancel() {},
+  })
 }
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <a-layout>
     <a-layout-header :style="{ width: '100%', background: '#fff' }">
-      <a-row>
+      <a-row :wrap="false">
         <a-col flex="150px">
           <div class="logo">
             <img src="@/assets/logo.png" class="img" alt="" />
@@ -9,12 +9,8 @@
           </div></a-col
         >
         <a-col flex="auto"
-          ><a-menu
-            v-model:selectedKeys="selectedKeys"
-            mode="horizontal"
-            :style="{ lineHeight: '64px' }"
-          >
-            <a-menu-item key="/" @click="changeMenu('home')">
+          ><a-menu :selectedKeys="[route.path]" mode="horizontal" :style="{ lineHeight: '64px' }">
+            <a-menu-item key="/home" @click="changeMenu('home')">
               <span>主页</span>
             </a-menu-item>
             <a-menu-item key="/chart" @click="changeMenu('chart')">
@@ -44,11 +40,11 @@
             <template #overlay>
               <a-menu>
                 <a-menu-item>
-                  <a href="javascript:;">1st menu item</a>
+                  <a href="javascript:;">个人主页</a>
                 </a-menu-item>
-                <a-menu-item>
+                <!-- <a-menu-item>
                   <a href="javascript:;">2nd menu item</a>
-                </a-menu-item>
+                </a-menu-item> -->
                 <a-menu-divider />
                 <a-menu-item @click="logout">
                   <a href="javascript:;">退出登录</a>
@@ -75,24 +71,38 @@
   </a-layout>
 </template>
 <script setup>
-import { ref } from 'vue'
-const selectedKeys = ref(['/'])
+import { onMounted, ref } from 'vue'
+const selectedKeys = ref(['/home'])
 // 路由
 import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
+// 路由变量
+// import { routes } from '@/router/routes'
+// const menuRouter = ref([routes[0].children])
+// 菜单切换
+// const aa = ({ key }) => {
+//   console.log('菜单切换', key)
+// }
 // 接口
 import { UserlLogout } from '@/api/user'
 // pinia
 import { useUserStore } from '@/stores/user'
 import { message } from 'ant-design-vue'
 const userStore = useUserStore()
+
 // 切换菜单
 const changeMenu = (path) => {
   console.log(path)
   console.log(route.path)
   router.push({ name: path })
 }
+// 路由更新时自动更新选中的菜单项
+router.afterEach((to) => {
+  console.log('菜单更新', to)
+
+  selectedKeys.value = [to.path]
+})
 // 跳转登录页
 const tologin = () => {
   router.push({ name: 'login' })

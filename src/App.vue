@@ -1,6 +1,4 @@
-<script setup>
-// import BasicLayout from '@/views/Layout/BasicLayout.vue'
-</script>
+<script setup></script>
 
 <template>
   <RouterView></RouterView>

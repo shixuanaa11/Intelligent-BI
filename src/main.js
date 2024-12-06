@@ -11,7 +11,7 @@ import * as echarts from 'echarts'
 import router from './router'
 
 import './global.less'
-import '@/router/permission'
+import '@/access/index'
 const app = createApp(App)
 // 使用组件
 app.component('e-charts', Echarts)

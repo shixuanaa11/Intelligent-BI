@@ -8,3 +8,5 @@ export const UserLogin = ({ account, password }) =>
 export const UserRegister = (data) => request.post('/user/register', data)
 // 注销接口
 export const UserlLogout = () => request.post('/user/logout')
+// 获取用户信息接口
+export const GetLoginUserInfo = () => request.get('/user/get/login')

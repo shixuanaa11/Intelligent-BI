@@ -116,23 +116,27 @@ const handleSubmit = async () => {
   console.log(' Logindata.value', Logindata.value)
   loginBtn.value = true
   // 登录接口(这里之后接口改良，要给个error)
-  const res = await UserLogin(Logindata.value)
-  // .then((res) => {
-  console.log('res', res)
-  loginBtn.value = false
-  if (res.code == 0) {
-    userStore.SET_USERINFO(res.data)
-    isLoginError.value = false
-    console.log(userStore.userInfo)
+  try {
+    const res = await UserLogin(Logindata.value)
+    // .then((res) => {
+    console.log('res', res)
+    loginBtn.value = false
+    if (res.code == 0) {
+      userStore.SET_USERINFO(res.data)
+      isLoginError.value = false
+      console.log(userStore.userInfo)
 
-    message.success('登录成功')
-    // 路由跳转到首页
-    router.push({ name: 'home' })
-  } else {
-    // console.log('err', err)
-    message.error(res.description)
-    // loginBtn.value = false
-    isLoginError.value = true
+      message.success('登录成功')
+      // 路由跳转到首页
+      router.push({ name: 'home', replace: true })
+    } else {
+      // console.log('err', err)
+      message.error(res.description)
+      // loginBtn.value = false
+      isLoginError.value = true
+    }
+  } catch (error) {
+    loginBtn.value = false
   }
 
   // 错误的时候就传请求出现错误
