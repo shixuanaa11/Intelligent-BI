@@ -11,6 +11,12 @@ spring:
   jackson:
     date-format: java.text.SimpleDateFormat
     time-zone: GMT+8
+  data:
+    redis:
+      port: 6379
+      host: localhost
+      database: 1
+      connect-timeout: 10000
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -39,7 +45,6 @@ server:
     session:
       cookie:
         domain: localhost
-
 
 ai:
   api-key: 408c9ced837f4189cd74d419ec383342.GcHzZ62V55vwffMR

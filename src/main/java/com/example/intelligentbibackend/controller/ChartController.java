@@ -1,15 +1,18 @@
 package com.example.intelligentbibackend.controller;
 
 
+import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.intelligentbibackend.common.BaseResponse;
 import com.example.intelligentbibackend.common.ErrorCode;
 import com.example.intelligentbibackend.common.ResultUtils;
+import com.example.intelligentbibackend.config.RedissionConfig;
 import com.example.intelligentbibackend.constant.CommonConstant;
 import com.example.intelligentbibackend.exception.BesinessException;
 import com.example.intelligentbibackend.manager.AiManager;
+import com.example.intelligentbibackend.manager.RedisLimiterManager;
 import com.example.intelligentbibackend.model.domain.Chart;
 import com.example.intelligentbibackend.model.domain.User;
 import com.example.intelligentbibackend.model.request.chart.ChartQueryRequest;
@@ -24,6 +27,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
+
 @RestController
 @RequestMapping("/chart")
 @CrossOrigin(origins = {"http://localhost:5173"},allowCredentials = "true")
@@ -36,6 +44,8 @@ public class ChartController {
 
     @Resource
     private AiManager aiManager;
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
 
     @PostMapping("/gen")
     public BaseResponse<BiResponse> genChartByAi(@RequestPart("file") MultipartFile multipartFile,
@@ -57,6 +67,24 @@ public class ChartController {
         if (StringUtils.isNotBlank(chartName) && chartName.length() > 100){
             throw new BesinessException(ErrorCode.PARAMS_ERROR, "名称过长");
         }
+//            校验文件
+        long size = multipartFile.getSize();
+        String filename = multipartFile.getOriginalFilename();
+        final long ONE_SIZE = 1024 * 1024 ;
+//        文件不能超过1M
+        if (size > ONE_SIZE){
+            throw new BesinessException(ErrorCode.PARAMS_ERROR, "文件过大");
+        }
+//        校验文件后缀
+        String validFileSuffixList = FileUtil.getSuffix(filename);
+//        文件白名单（允许用的文件类型）
+        List<String> list = Arrays.asList("xls", "xlsx","png","jpg","jpeg","svg","csv");
+        if(list.contains(validFileSuffixList)){
+            throw new BesinessException(ErrorCode.PARAMS_ERROR, "文件类型错误");
+        }
+//        限流判断,每个用户一个限流器
+        redisLimiterManager.doRateLimiter("genChartByAI"+String.valueOf(userId));
+
 
 //        user_prompt预设
 //        拿到数据后拼接这些数据和加上提示词 换行，这样便于AI更好的识别
@@ -98,7 +126,7 @@ public class ChartController {
                 "'【【【【【'\n" +
                 "JSON格式代码\n" +
                 "'【【【【【'\n" +
-                "结论：";
+                "结论：\n";
 
 //        ai生成
         String gen = aiManager.doSyncStableRequest(prompt, userInput.toString());

@@ -6,7 +6,8 @@ public enum ErrorCode {
     NULL_ERROR(40001, "请求数据为空", ""),
     NO_PERMISSION(40101, "无权限访问", ""),
     NO_LOGIN(40100, "未登录", ""),
-    SYSTEM_ERROR(50000, "系统内部异常", "");
+    SYSTEM_ERROR(50000, "系统内部异常", ""),
+    TOO_MANY_REQUEST(42900,"请求过于频繁","");
 
     private final int code;
     /**

@@ -20,6 +20,6 @@ public class AiConfig {
     private String apiKey;
     @Bean
     public ClientV4 getClientV4(){
-        return new ClientV4.Builder(apiKey).networkConfig(300, 100, 100, 100, TimeUnit.SECONDS).build();
+        return new ClientV4.Builder(apiKey).networkConfig(300, 100, 100, 300, TimeUnit.SECONDS).build();
     }
 }

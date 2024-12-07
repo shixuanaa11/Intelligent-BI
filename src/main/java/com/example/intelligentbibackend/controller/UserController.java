@@ -83,7 +83,7 @@ public BaseResponse<Integer> logout( HttpServletRequest request) {
      * @return
      */
     @GetMapping("/get/login")
-    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
+    public BaseResponse<LoginUserVO> getLoginUserInfo(HttpServletRequest request) {
         User user = userService.getloginuser(request);
         return ResultUtils.success(userService.getLoginUserVO(user));
     }
