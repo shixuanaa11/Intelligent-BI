@@ -31,6 +31,11 @@ create table chart
     userId      bigint                             null comment '(创建图表的)用户ID',
     createTime  datetime default CURRENT_TIMESTAMP null comment '创建时间',
     updateTime  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+    -- 任务状态字段(排队中wait、执行中running、已完成succeed、失败failed)
+    status       varchar(128) not null default 'wait' comment 'wait,running,succeed,failed',
+-- 任务执行信息字段
+    execMessage  text   null comment '执行信息',
+
     isDelete    tinyint  default 0                 not null comment '是否删除'
 )
     comment '图表表';

@@ -18,14 +18,14 @@ public class GlobalExceptionHandler {
 //    捕获运行时业务异常
 //    @ExceptionHandler(RuntimeException.class)：这是一个注解，用于指定这个方法处理RuntimeException类型的异常。当控制器中抛出RuntimeException时，Spring会自动调用这个方法来处理异常
     @ExceptionHandler(BesinessException.class)
-    public BaseResponse businessExceptionHandler(BesinessException e){
+    public BaseResponse<?> businessExceptionHandler(BesinessException e){
         log.error("业务异常",e);
         return ResultUtils.error(e.getCode(),e.getDescription(), e.getMessage());
     }
 //    捕获运行时系统内部异常
-    @ExceptionHandler(RuntimeException.class)
-    public BaseResponse runtimeExceptionHandler(BesinessException e){
-        log.error("系统内部异常",e);
-     return ResultUtils.error(ErrorCode.SYSTEM_ERROR,"系统内部异常", e.getMessage());
-    }
+@ExceptionHandler(RuntimeException.class)
+public BaseResponse<?> runtimeExceptionHandler(RuntimeException e) {
+    log.error("RuntimeException", e);
+    return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "系统错误");
+}
 }

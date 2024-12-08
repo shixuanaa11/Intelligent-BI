@@ -15,12 +15,14 @@
         <result property="userId" column="userId" jdbcType="BIGINT"/>
             <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+        <result property="execMessage" column="execMessage" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
             <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,goal,chartName,chartData,
         chartType,AiGenChart,AiGenResult,
-        createTime,updateTime,isDelete,userId
+        createTime,updateTime,isDelete,userId,status,execMessage
     </sql>
 </mapper>

@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import lombok.Data;
 
 /**
@@ -61,6 +63,17 @@ public class Chart implements Serializable {
      * 更新时间
      */
     private Date updateTime;
+
+    /**
+     * 任务状态
+     */
+    private String status;
+
+    /**
+     * 执行信息
+     */
+
+    private String execMessage;
 
     /**
      * 是否删除

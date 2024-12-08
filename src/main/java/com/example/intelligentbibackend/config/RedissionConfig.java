@@ -14,7 +14,7 @@ import java.io.File;
 
 
 @Configuration
-@ConfigurationProperties(prefix = "spring.redis")
+@ConfigurationProperties(prefix = "spring.data.redis")
 @Data
 public class RedissionConfig {
 
@@ -28,7 +28,7 @@ public class RedissionConfig {
    public RedissonClient getRedissonClient(){
        Config config = new Config();
 //       这里由于我们现在还是单机，所以使用单机配置useSingleServer,集群多机就要useClusterServers
-       config.useSingleServer().setDatabase(1).setAddress("redis://"+host+":"+port);
+       config.useSingleServer().setDatabase(database).setAddress("redis://"+host+":"+port);
 
 // or read config from file
 //       config = Config.fromYAML(new File("config-file.yaml"));
