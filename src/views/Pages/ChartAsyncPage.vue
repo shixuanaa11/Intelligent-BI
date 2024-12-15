@@ -1,7 +1,7 @@
 <template>
   <a-row :gutter="24" justify="space-between">
     <a-col :span="11">
-      <a-card title="AI智能分析">
+      <a-card title="AI异步分析">
         <a-form
           :labelCol="{ span: 4 }"
           :model="formState"
@@ -27,8 +27,8 @@
             :rules="[{ required: true, message: 'Please select your country!' }]"
           >
             <a-select
+              placeholder="请选择图表类型"
               v-model:value="formState.ChartType"
-              placeholder="Please select a country"
               :options="options"
             >
             </a-select>
@@ -54,27 +54,19 @@
         </a-form>
       </a-card>
     </a-col>
-
-    <a-col :span="12">
-      <a-card title="分析结论">{{ result ? result : '请点击左侧提交' }} </a-card>
-      <Divider />
-      <a-card title="可视化图表">
-        <Genchart></Genchart>
-      </a-card>
-    </a-col>
   </a-row>
 </template>
 <script setup>
 import { ref } from 'vue'
 import { UploadOutlined } from '@ant-design/icons-vue'
-import { Divider, message } from 'ant-design-vue'
-import Genchart from '@/components/chart.vue'
+import { message } from 'ant-design-vue'
+
 // 接口
-import { genChartByAi } from '@/api/chart'
+import { genChartByAiAsync } from '@/api/chart'
 // pinia
-import { useChartStore } from '@/stores/chart'
-import { storeToRefs } from 'pinia'
-const chartStore = useChartStore()
+// import { useChartStore } from '@/stores/chart'
+// import { storeToRefs } from 'pinia'
+// const chartStore = useChartStore()
 // 按钮加载
 const loading = ref(false)
 const formState = ref({
@@ -83,8 +75,6 @@ const formState = ref({
   ChartName: '',
   ChartType: '',
 })
-// ai生成结果
-const { AIGENRESULT: result } = storeToRefs(chartStore)
 
 // ai生成的图表
 // const chartData = chartStore.AIGENCHART
@@ -101,26 +91,18 @@ const onFinish = async () => {
   console.log(formData)
 
   try {
-    const res = await genChartByAi(formData)
+    const res = await genChartByAiAsync(formData)
     console.log(res)
     if (res?.code == 0) {
-      message.success('分析成功')
-      const Genchart = JSON.parse(res.data.aiGenChart)
-      if (!Genchart) {
-        message.error('图表代码解析错误')
-        throw new Error('图表代码解析错误')
-      }
+      message.success('分析任务提交成功，请稍后在我的图表查看')
 
-      chartStore.SET_AIGENRESULT(res.data.aiGenResult)
-      chartStore.SET_AIGENCHART(JSON.parse(res.data.aiGenChart))
       console.log('结论数据', res.data.aiGenResult)
-      console.log('pinia的结论数据', chartStore.AIGENRESULT)
     } else {
       message.error('分析失败')
     }
   } catch (error) {
-    console.log(error)
     message.error('分析失败，' + error.message)
+    console.log(error)
   } finally {
     loading.value = false
   }

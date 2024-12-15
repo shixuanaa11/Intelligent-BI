@@ -13,9 +13,9 @@
     :grid="{ gutter: 2, xs: 1, sm: 1, md: 1, lg: 1, xl: 2, xxl: 2 }"
     :loading="listLoading"
   >
-    <template #renderItem="{ item }">
+    <template #renderItem="{ item, index }">
       <a-list-item key="item.title">
-        <a-card>
+        <a-card style="max-width: 100%; overflow: hidden">
           <a-list-item-meta>
             <template #description>
               <a-tag color="success">{{ '图表类型: ' + item?.chartType }}</a-tag>
@@ -34,13 +34,13 @@
                   <template #overlay>
                     <a-menu>
                       <a-menu-item>
-                        <a href="javascript:;">查看JS源码</a>
+                        <a href="javascript:;" @click="checkjs(item)">查看JS源码</a>
                       </a-menu-item>
                       <a-menu-item>
-                        <a href="javascript:;">下载</a>
+                        <a href="javascript:;" @click="Download(index)">下载</a>
                       </a-menu-item>
                       <a-menu-item>
-                        <a href="javascript:;" @click="deleteChart(item.id)">删除</a>
+                        <a href="javascript:;" @click="deleteChartbyId(item)">删除</a>
                       </a-menu-item>
                     </a-menu>
                   </template>
@@ -50,11 +50,36 @@
 
             <template #avatar><a-avatar :src="item.avatar" /></template>
           </a-list-item-meta>
-          <v-chart
-            style="width: 600px; height: 300px"
-            :option="JSON.parse(item.aiGenChart ?? '{}')"
-            autoresize
-          />
+          <div v-if="item.status == 'succeed'">
+            <v-chart
+              style="
+                width: 100%;
+                height: 300px;
+                margin-bottom: 16px;
+                overflow: hidden; /* 防止内容被裁剪 */
+              "
+              :option="chartOption(item)"
+              :auto-resize="true"
+              :ref="(el) => (chartRefs[index] = el)"
+            />
+          </div>
+          <div v-if="item.status == 'failed'">
+            <a-result status="error" title="图表生成失败" :sub-title="item.execMessage"> </a-result>
+          </div>
+
+          <div v-if="item.status == 'running'">
+            <a-result status="info" title="图表生成中" :sub-title="item.execMessage"> </a-result>
+          </div>
+
+          <div v-if="item.status == 'wait'">
+            <a-result
+              status="warning"
+              title="待生成"
+              :sub-title="item.execMessage ? item.execMessage : '当前图表生成队列繁忙，请耐心等候'"
+            >
+            </a-result>
+          </div>
+
           <a-collapse v-model:activeKey="activeKey" style="width: 100%">
             <a-collapse-panel :key="item.id" header="AI分析结论">
               <p>{{ item.aiGenResult ?? '' }}</p>
@@ -62,14 +87,15 @@
           </a-collapse>
         </a-card>
       </a-list-item>
+      <JscodeModel ref="model"></JscodeModel>
     </template>
   </a-list>
 </template>
 <script setup>
-import { listMyChartByPage } from '@/api/chart'
+import { listMyChartByPage, deleteChart } from '@/api/chart'
 import { message, Modal } from 'ant-design-vue'
 import { EllipsisOutlined } from '@ant-design/icons-vue'
-import { onMounted, ref } from 'vue'
+import { nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const chartData = ref({
   current: 0,
@@ -113,6 +139,9 @@ const loadData = async () => {
 onMounted(() => {
   loadData()
 })
+onBeforeUnmount(() => {
+  chartRefs.value = []
+})
 
 // 列表组件属性
 
@@ -124,6 +153,7 @@ const pagination = {
 }
 // 图表
 import VChart from 'vue-echarts'
+import JscodeModel from '@/components/jscodeModel.vue'
 // import { computed, watchEffect } from 'vue'
 
 const activeKey = ref(['1'])
@@ -133,8 +163,9 @@ const onSearch = () => {
   loadData()
 }
 // 删除图表
-const deleteChart = (id) => {
-  console.log('删除图表 ID', id)
+const deleteChartbyId = (item) => {
+  console.log('删除图表', item)
+  console.log('删除图表 ID', item.id)
   Modal.confirm({
     title: '删除图表',
     // icon: h(ExclamationCircleOutlined),
@@ -143,18 +174,95 @@ const deleteChart = (id) => {
     cancelText: '取消',
     async onOk() {
       try {
-        return (
-          await new Promise((resolve, reject) => {
-            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000)
-          }),
+        const res = await deleteChart(item.id)
+        if (res.code == 0) {
           message.success('删除成功')
-        )
+          loadData()
+        } else {
+          message.error('删除失败')
+        }
       } catch {
         return console.log('Oops errors!')
       }
     },
     onCancel() {},
   })
+}
+
+// 图表
+const chartOption = (item) => {
+  // console.log('图表函数')
+  try {
+    // console.log('图表函数')
+    const option = JSON.parse(item.aiGenChart ?? '{}')
+    // 如果数据点过多，启用滚动条
+    option.dataZoom = [
+      {
+        type: 'inside', // 鼠标滚动缩放
+        start: 0,
+        end: 20, // 默认显示前 20% 的数据
+      },
+      {
+        type: 'slider',
+        show: true,
+        start: 0,
+        end: 20,
+        bottom: 30,
+      },
+    ]
+    option.grid = {
+      left: '10%', // 左边距
+      right: '10%', // 右边距
+      bottom: '40%', // 为滚动条预留空间
+    }
+    return option
+    // return JSON.parse(item.aiGenChart ?? '{}')
+  } catch (error) {
+    console.error('Failed to parse chart option:', error)
+    return null
+  }
+}
+// js代码弹窗ref
+const model = ref()
+// js代码弹窗
+const checkjs = (item) => {
+  console.log(model.value)
+  console.log(item)
+
+  model.value.openModal()
+  model.value.getdata(JSON.parse(item.aiGenChart))
+}
+// 下载
+//动态获取实例
+const chartRefs = ref([])
+
+// todo:v-for动态获取实例的问题
+const Download = (index) => {
+  console.log(index)
+  // console.log(chartRefs.value[index])
+
+  nextTick(() => {
+    const chartInstance = chartRefs.value[index]
+
+    if (chartInstance) {
+      const imageURL = chartInstance.getDataURL({
+        pixelRatio: 2,
+        backgroundColor: '#fff',
+      })
+      const link = document.createElement('a')
+      link.href = imageURL
+      link.download = `chart_${index}.png`
+      link.click()
+    }
+  })
+  // const imgData = chartref.value.getDataURL({
+  // pixelRatio: 2,
+  // backgroundColor: '#fff',
+  // })
+  // const link = document.createElement('a')
+  // link.href = imgData
+  // link.download = 'chart.png'
+  // link.click()
 }
 </script>
 

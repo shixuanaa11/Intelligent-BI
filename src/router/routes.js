@@ -17,6 +17,11 @@ export const routes = [
         component: () => import('@/views/Pages/ChartPage.vue'),
       },
       {
+        path: '/chart/Async',
+        name: 'chartAsync',
+        component: () => import('@/views/Pages/ChartAsyncPage.vue'),
+      },
+      {
         path: '/my',
         name: 'my',
         component: () => import('@/views/Pages/My.vue'),

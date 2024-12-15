@@ -14,7 +14,10 @@
               <span>主页</span>
             </a-menu-item>
             <a-menu-item key="/chart" @click="changeMenu('chart')">
-              <span>图表</span>
+              <span>智能分析</span>
+            </a-menu-item>
+            <a-menu-item key="/chart/Async" @click="changeMenu('chartAsync')">
+              <span>异步分析</span>
             </a-menu-item>
             <a-menu-item key="/mychart" @click="changeMenu('mychart')">
               <span>图表管理</span>
@@ -56,11 +59,12 @@
       </a-row>
     </a-layout-header>
     <a-layout-content :style="{ padding: '0 50px' }">
-      <a-breadcrumb :style="{ margin: '16px 0' }">
+      <!-- <a-breadcrumb :style="{ margin: '16px 0' }">
         <a-breadcrumb-item>Home</a-breadcrumb-item>
         <a-breadcrumb-item>List</a-breadcrumb-item>
         <a-breadcrumb-item>App</a-breadcrumb-item>
-      </a-breadcrumb>
+      </a-breadcrumb> -->
+      <div :style="{ margin: '16px 0' }"></div>
       <div :style="{ background: '#fff', padding: '24px', minHeight: '530px' }">
         <router-view></router-view>
       </div>

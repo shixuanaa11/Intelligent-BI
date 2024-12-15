@@ -5,6 +5,7 @@ import { createPinia } from 'pinia'
 import Antd from 'ant-design-vue'
 import App from './App.vue'
 import 'ant-design-vue/dist/reset.css'
+
 // 引入echarts
 import Echarts from 'vue-echarts'
 import * as echarts from 'echarts'
