@@ -16,8 +16,10 @@ import com.example.intelligentbibackend.manager.RedisLimiterManager;
 import com.example.intelligentbibackend.model.domain.Chart;
 import com.example.intelligentbibackend.model.domain.User;
 import com.example.intelligentbibackend.model.request.chart.ChartQueryRequest;
+import com.example.intelligentbibackend.model.request.chart.DeleteRequest;
 import com.example.intelligentbibackend.model.request.chart.GenChartByAiRequest;
 import com.example.intelligentbibackend.model.vo.BiResponse;
+import com.example.intelligentbibackend.mq.BIMessageProducer;
 import com.example.intelligentbibackend.service.ChartService;
 import com.example.intelligentbibackend.service.UserService;
 import com.example.intelligentbibackend.utils.ExcelUtils;
@@ -32,12 +34,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
 @RequestMapping("/chart")
-@CrossOrigin(origins = {"http://localhost:5173"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5175"},allowCredentials = "true")
 @Slf4j
 public class ChartController {
 
@@ -53,6 +56,9 @@ public class ChartController {
 
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
+
+    @Resource
+    private BIMessageProducer biMessageProducer;
 
     /**
      * 图表生成(同步)
@@ -300,6 +306,80 @@ public class ChartController {
     }
 
     /**
+     * 用消息队列实现的异步
+     * @param multipartFile
+     * @param genChartByAiRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/gen/async/mq")
+    public BaseResponse<BiResponse> genChartByAiAsyncMQ(@RequestPart("file") MultipartFile multipartFile,
+                                                      GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
+
+        String chartName = genChartByAiRequest.getChartName();
+        String goal = genChartByAiRequest.getGoal();
+        String chartType = genChartByAiRequest.getChartType();
+        // 校验
+        //        拿到用户登录id
+        User loginUser = userService.getloginuser(request);
+        if (loginUser==null){
+            throw new BesinessException(ErrorCode.NO_LOGIN);
+        }
+        Long userId = loginUser.getId();
+        if (StringUtils.isBlank(goal)){
+            throw new BesinessException(ErrorCode.PARAMS_ERROR, "目标为空");
+        }
+        if (StringUtils.isNotBlank(chartName) && chartName.length() > 100){
+            throw new BesinessException(ErrorCode.PARAMS_ERROR, "名称过长");
+        }
+//            校验文件
+        long size = multipartFile.getSize();
+        String filename = multipartFile.getOriginalFilename();
+        final long ONE_SIZE = 1024 * 1024 ;
+//        文件不能超过1M
+        if (size > ONE_SIZE){
+            throw new BesinessException(ErrorCode.PARAMS_ERROR, "文件过大");
+        }
+//        校验文件后缀
+        String validFileSuffixList = FileUtil.getSuffix(filename);
+//        文件白名单（允许用的文件类型）
+        List<String> list = Arrays.asList("xls", "xlsx","csv");
+        if(!list.contains(validFileSuffixList)){
+            throw new BesinessException(ErrorCode.PARAMS_ERROR, "文件类型错误");
+        }
+        String csvData = ExcelUtils.excelToCsv(multipartFile);
+//        限流判断,每个用户一个限流器
+        redisLimiterManager.doRateLimiter("genChartByAI"+String.valueOf(userId));
+
+//        插入数据库
+        Chart chart = new Chart();
+        chart.setChartName(chartName);
+        chart.setGoal(goal);
+        chart.setChartType(chartType);
+        chart.setChartData(csvData);
+        chart.setStatus("wait");
+
+        chart.setUserId(userId);
+        boolean save = chartService.save(chart);
+        if (!save){
+            throw new BesinessException(ErrorCode.SYSTEM_ERROR, "保存失败");
+        }
+
+
+        Long chartId = chart.getId();
+
+//        进消息队列Mq （这里有个问题，把代码放到消费者里面，然后去查数据库，不会造成性能的多余浪费吗）
+//        不提线程池，改为给消息队列发消息，把线程池里面逻辑的代码放到消费者里面
+        biMessageProducer.sendMessage(String.valueOf(chartId));
+
+        //        将返回结果统一封装在一个类里面
+        BiResponse biResponse = new BiResponse();
+        biResponse.setChartId(chartId);
+        return ResultUtils.success(biResponse);
+
+    }
+
+    /**
      * 图表错误信息类
      * @param chartId
      * @param execMessage
@@ -372,5 +452,36 @@ public class ChartController {
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;
+    }
+
+
+    /**
+     * 删除接口
+     * 1. 判断是否登录
+     * 2. 判断权限,判断是不是本人
+     * 3. 删除
+     */
+    @PostMapping("/delete")
+    public  BaseResponse<Boolean> deleteChart(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        Long id = deleteRequest.getId();
+        if (id == null) {
+            throw new BesinessException(ErrorCode.NULL_ERROR);
+        }
+        User loginUser = userService.getloginuser(request);
+        if (loginUser == null) {
+            throw new BesinessException(ErrorCode.NO_LOGIN);
+        }
+        Chart chart = chartService.getById(id);
+        if (chart == null) {
+            throw new BesinessException(ErrorCode.PARAMS_ERROR,"查不到该图表");
+        }
+        if (!Objects.equals(chart.getUserId(), loginUser.getId())) {
+            throw new BesinessException(ErrorCode.NO_PERMISSION,"您无权限删除该图表");
+        }
+        boolean result = chartService.removeById(id);
+        if (!result){
+           throw new BesinessException(ErrorCode.PARAMS_ERROR,"删除失败");
+        }
+        return ResultUtils.success(true);
     }
 }

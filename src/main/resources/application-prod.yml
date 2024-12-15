@@ -1,12 +1,22 @@
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: axuan
-    password: 123456
-    url: jdbc:mysql://43.138.252.106:3306/axuan
-  session:
-#    设置令牌的失效时间 1天86400秒
-    timeout: 86400
 server:
   port: 8081
-  address: 0.0.0.0
+spring:
+  # 数据库配置
+  # todo 需替换配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/my_db
+    username: root
+    password: 123456
+
+  data:
+    redis:
+      database: 1
+      host: localhost
+      port: 6379
+      timeout: 5000
+      password: 123456
+mybatis-plus:
+  configuration:
+    # 生产环境关闭日志
+    log-impl: ''

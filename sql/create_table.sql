@@ -22,20 +22,43 @@ create table chart
 (
     id          bigint auto_increment comment 'id'
         primary key,
-    goal        text                               null comment '分析目标',
-    chartName   varchar(128)                       null comment '图表名称',
-    chartData   text                               null comment '图表数据',
-    chartType   varchar(128)                       null comment '图表类型',
-    AiGenChart  text                               null comment 'AI生成图表数据',
-    AiGenResult text                               null comment '生成的分析结论',
-    userId      bigint                             null comment '(创建图表的)用户ID',
-    createTime  datetime default CURRENT_TIMESTAMP null comment '创建时间',
-    updateTime  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
-    -- 任务状态字段(排队中wait、执行中running、已完成succeed、失败failed)
-    status       varchar(128) not null default 'wait' comment 'wait,running,succeed,failed',
--- 任务执行信息字段
-    execMessage  text   null comment '执行信息',
-
-    isDelete    tinyint  default 0                 not null comment '是否删除'
+    goal        text                                   null comment '分析目标',
+    chartName   varchar(128)                           null comment '图表名称',
+    chartData   text                                   null comment '图表数据',
+    chartType   varchar(128)                           null comment '图表类型',
+    AiGenChart  text                                   null comment 'AI生成图表数据',
+    AiGenResult text                                   null comment '生成的分析结论',
+    userId      bigint                                 null comment '(创建图表的)用户ID',
+    createTime  datetime     default CURRENT_TIMESTAMP null comment '创建时间',
+    updateTime  datetime     default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+    status      varchar(128) default 'wait'            not null comment 'wait,running,succeed,failed',
+    execMessage text                                   null comment '执行信息',
+    isDelete    tinyint      default 0                 not null comment '是否删除'
 )
     comment '图表表';
+
+-- 图片表
+create table if not exists picture
+(
+    id           bigint auto_increment comment 'id' primary key,
+    url          varchar(512)                       not null comment '图片 url',
+    name         varchar(128)                       not null comment '图片名称',
+    introduction varchar(512)                       null comment '简介',
+    category     varchar(64)                        null comment '分类',
+    tags         varchar(512)                      null comment '标签（JSON 数组）',
+    picSize      bigint                             null comment '图片体积',
+    picWidth     int                                null comment '图片宽度',
+    picHeight    int                                null comment '图片高度',
+    picScale     double                             null comment '图片宽高比例',
+    picFormat    varchar(32)                        null comment '图片格式',
+    userId       bigint                             not null comment '创建用户 id',
+    createTime   datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    editTime     datetime default CURRENT_TIMESTAMP not null comment '编辑时间',
+    updateTime   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete     tinyint  default 0                 not null comment '是否删除',
+    INDEX idx_name (name),                 -- 提升基于图片名称的查询性能
+    INDEX idx_introduction (introduction), -- 用于模糊搜索图片简介
+    INDEX idx_category (category),         -- 提升基于分类的查询性能
+    INDEX idx_tags (tags),                 -- 提升基于标签的查询性能
+    INDEX idx_userId (userId)              -- 提升基于用户 ID 的查询性能
+) comment '图片' collate = utf8mb4_unicode_ci;

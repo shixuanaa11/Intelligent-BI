@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:5173"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5175"},allowCredentials = "true")
 public class UserController {
 
 
