@@ -3,6 +3,7 @@ package com.example.intelligentbibackend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.intelligentbibackend.common.ErrorCode;
+import com.example.intelligentbibackend.enums.UserRoleEnum;
 import com.example.intelligentbibackend.exception.BesinessException;
 
 import com.example.intelligentbibackend.model.domain.User;
@@ -227,6 +228,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         LoginUserVO loginUserVO = new LoginUserVO();
         BeanUtils.copyProperties(user, loginUserVO);
         return loginUserVO;
+    }
+
+    @Override
+    public boolean isAdmin(User user) {
+        if(user == null) {
+            return false;
+        }
+//        判断用户是否是管理员
+        if (UserRoleEnum.ADMIN.getValue().equals(user.getUserRole())) {
+            return false;
+        }
+        return true;
     }
 
 }

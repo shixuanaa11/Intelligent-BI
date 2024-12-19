@@ -4,7 +4,6 @@ spring:
     username: root
     password: 123456
     url: jdbc:mysql://localhost:3306/bi
-
   session:
 #    设置令牌的失效时间 1天86400秒
     timeout: 86400
@@ -22,6 +21,9 @@ spring:
     port: 5672
     password: guest
     username: guest
+  servlet:
+    multipart:
+      max-file-size: 10MB
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -53,3 +55,15 @@ server:
 
 ai:
   api-key: 408c9ced837f4189cd74d419ec383342.GcHzZ62V55vwffMR
+  # 对象存储配置（需要从腾讯云获取）
+# 对象存储配置（需要从腾讯云获取）
+cos:
+  client:
+    host: https://axuan-pic-1330015432.cos.ap-guangzhou.myqcloud.com
+    secretId: AKIDtfJm5NYZQ7g5KYehaIrFVbXKyTr692mN
+    secretKey: jJj2A9xa7c4QckpwvsiNxQju270hEev0
+#    region: <axuan-pic-1330015432>.cos.ap-guangzhou.myqcloud.com
+    region: ap-guangzhou
+    bucket: axuan-pic-1330015432
+
+

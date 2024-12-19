@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Data
-public class DeleteRequest implements Serializable {
+public class ChartDeleteRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = -8961212201997878616L;
 

@@ -77,12 +77,24 @@ public interface UserService extends IService<User> {
 //
 //    }
 
+    /**
+     * 获取session的用户信息
+     * @param request
+     * @return
+     */
     User getloginuser(HttpServletRequest request);
 
+    /**
+     * 脱敏用户信息
+     * @param user
+     * @return
+     */
     LoginUserVO getLoginUserVO(User user);
 
-//    int updateUser(Manageruser manageruser );
 
-//    List<Manageruser> searchUser(Manageruser manageruser);
+    /**
+     * 判断用户是否为管理员
+     */
+    boolean isAdmin(User user);
 
 }

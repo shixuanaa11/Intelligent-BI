@@ -16,7 +16,7 @@ import com.example.intelligentbibackend.manager.RedisLimiterManager;
 import com.example.intelligentbibackend.model.domain.Chart;
 import com.example.intelligentbibackend.model.domain.User;
 import com.example.intelligentbibackend.model.request.chart.ChartQueryRequest;
-import com.example.intelligentbibackend.model.request.chart.DeleteRequest;
+import com.example.intelligentbibackend.model.request.chart.ChartDeleteRequest;
 import com.example.intelligentbibackend.model.request.chart.GenChartByAiRequest;
 import com.example.intelligentbibackend.model.vo.BiResponse;
 import com.example.intelligentbibackend.mq.BIMessageProducer;
@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -40,7 +39,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
 @RequestMapping("/chart")
-@CrossOrigin(origins = {"http://localhost:5175"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5176"},allowCredentials = "true")
 @Slf4j
 public class ChartController {
 
@@ -462,8 +461,8 @@ public class ChartController {
      * 3. 删除
      */
     @PostMapping("/delete")
-    public  BaseResponse<Boolean> deleteChart(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
-        Long id = deleteRequest.getId();
+    public  BaseResponse<Boolean> deleteChart(@RequestBody ChartDeleteRequest chartDeleteRequest, HttpServletRequest request) {
+        Long id = chartDeleteRequest.getId();
         if (id == null) {
             throw new BesinessException(ErrorCode.NULL_ERROR);
         }
