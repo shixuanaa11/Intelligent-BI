@@ -3,10 +3,12 @@ package com.example.intelligentbibackend.controller;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.intelligentbibackend.annotation.AuthCheck;
 import com.example.intelligentbibackend.common.BaseResponse;
 import com.example.intelligentbibackend.common.DeleteRequest;
 import com.example.intelligentbibackend.common.ErrorCode;
 import com.example.intelligentbibackend.common.ResultUtils;
+import com.example.intelligentbibackend.constant.UserConstant;
 import com.example.intelligentbibackend.exception.BesinessException;
 import com.example.intelligentbibackend.manager.CosManager;
 import com.example.intelligentbibackend.model.domain.Picture;
@@ -34,7 +36,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/picture")
-@CrossOrigin(origins = {"http://localhost:5176"},allowCredentials = "true")
+//@CrossOrigin(origins = {"http://localhost:5176"},allowCredentials = "true")
 @Slf4j
 public class PictureController {
 
@@ -53,7 +55,7 @@ public class PictureController {
      * 有个管理员权限，后面补
      * @return
      */
-//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @PostMapping("/upload")
     public BaseResponse<PictureVO> UploadFile(@RequestPart("file") MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, HttpServletRequest request) {
         User loginuser = userService.getloginuser(request);
@@ -69,7 +71,7 @@ public class PictureController {
      * @param filepath 文件路径
      * @param response 响应对象
      */
-//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @GetMapping("/test/download/")
     public void testDownloadFile(String filepath, HttpServletResponse response) throws IOException {
         COSObjectInputStream cosObjectInput = null;
@@ -128,7 +130,7 @@ public class PictureController {
      * 更新图片（仅管理员可用）
      */
     @PostMapping("/update")
-//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updatePicture(@RequestBody PictureUpdateRequest pictureUpdateRequest) {
         if (pictureUpdateRequest == null || pictureUpdateRequest.getId() <= 0) {
             throw new BesinessException(ErrorCode.PARAMS_ERROR);
@@ -158,7 +160,7 @@ public class PictureController {
      * 根据 id 获取图片（仅管理员可用）
      */
     @GetMapping("/get")
-//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Picture> getPictureById(long id, HttpServletRequest request) {
         if (id <= 0){
             throw new BesinessException(ErrorCode.NULL_ERROR);
@@ -195,7 +197,7 @@ public class PictureController {
      * 分页获取图片列表（仅管理员可用）
      */
     @PostMapping("/list/page")
-//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<Picture>> listPictureByPage(@RequestBody PictureQueryRequest pictureQueryRequest) {
         long current = pictureQueryRequest.getCurrent();
         long size = pictureQueryRequest.getPageSize();

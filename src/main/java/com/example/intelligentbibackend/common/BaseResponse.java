@@ -2,6 +2,7 @@ package com.example.intelligentbibackend.common;
 
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 //接口返回标准类
@@ -12,6 +13,8 @@ import java.io.Serializable;
  */
 @Data
 public class BaseResponse<T> implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -5545399893014539209L;
     private int code;
 
     private T data;

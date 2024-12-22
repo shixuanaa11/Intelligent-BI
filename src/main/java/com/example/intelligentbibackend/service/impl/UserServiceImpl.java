@@ -1,5 +1,8 @@
 package com.example.intelligentbibackend.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.intelligentbibackend.common.ErrorCode;
@@ -7,7 +10,9 @@ import com.example.intelligentbibackend.enums.UserRoleEnum;
 import com.example.intelligentbibackend.exception.BesinessException;
 
 import com.example.intelligentbibackend.model.domain.User;
+import com.example.intelligentbibackend.model.request.user.UserQueryRequest;
 import com.example.intelligentbibackend.model.vo.LoginUserVO;
+import com.example.intelligentbibackend.model.vo.UserVO;
 import com.example.intelligentbibackend.service.UserService;
 import com.example.intelligentbibackend.mapper.UserMapper;
 import jakarta.annotation.Resource;
@@ -18,8 +23,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.example.intelligentbibackend.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -35,13 +43,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private UserMapper userMapper;
-    /**
-     * 盐值，混淆加密用的
-     */
-    private final String SALT = "axuan";
+
     /**
      * 用户登录态键
      */
+
 
 
     @Override
@@ -82,7 +88,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 //      2.给密码加密(可以找一个现成的库来实现加密)
 
-        String encodedPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        String encodedPassword = getEncryptPassword(password);
 //      3.存入数据
         User user = new User();
         user.setAccount(account);
@@ -95,6 +101,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new  BesinessException(ErrorCode.PARAMS_ERROR,"注册失败");
         }
         return user.getId();
+    }
+
+    /**
+     * 加密方法
+     * @param password
+     * @return
+     */
+    @Override
+    public String getEncryptPassword(String password) {
+        /**
+         * 盐值，混淆加密用的
+         */
+        final String SALT = "axuan";
+        return DigestUtils.md5DigestAsHex((SALT + password).getBytes());
     }
 
     @Override
@@ -117,7 +137,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 //      2.给密码加密(可以找一个现成的库来实现加密)
 
-        String encodedPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        String encodedPassword = getEncryptPassword(password);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("account", account);
         queryWrapper.eq("password", encodedPassword);
@@ -158,47 +178,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return 1;
     }
 
-    /**
-     * 用户更新編輯
-     * @param
-     * @return
-     */
-//    @Override
-//
-//    public int updateUser(User user) {
-//
-//        long id = user.getId();
-//        if (id <=0){
-//            throw new BesinessException(ErrorCode.PARAMS_ERROR);
-//        }
-////       判断用户是否为管理员或者要修改的用户是否为当前用户，如果都不是的话就无权限
-////        if (!isAdmin(loginuser) && id != loginuser.getId()) {
-////            throw new BesinessException(ErrorCode.NO_PERMISSION);
-////        }
-//        //            通过id找数据库里面的对应数据
-//        Manageruser searchuser = userMapper.selectById(id);
-//        if (searchuser == null) {
-//            throw new BesinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
-//        }
-//        return userMapper.updateById(manageruser);
-//
-//    }
-//    @Override
-//    public List<Manageruser> searchUser(Manageruser manageruser) {
-//        QueryWrapper<Manageruser> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.like(StringUtils.isNotBlank(manageruser.getUsername()),"username", manageruser.getUsername())
-//                .like(StringUtils.isNotBlank(manageruser.getAccount()),"account", manageruser.getAccount())
-//                .eq(manageruser.getGender()>0,"gender",manageruser.getGender())
-//                .eq(manageruser.getStatus()>0,"status",manageruser.getStatus())
-//                .eq(manageruser.getUserRole()>0,"userRole",manageruser.getUserRole())
-//                .like(StringUtils.isNotBlank(manageruser.getPhone()),"phone",manageruser.getPhone());
-//
-////       最后还有一个时间
-////        queryWrapper.between("createTime", manageruser.getCreateTime());
-//        List<Manageruser> userlist = userMapper.selectList(queryWrapper);
-//        return userlist;
-//
-//    }
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
+    }
+
+    @Override
+    public List<UserVO> getUserVOList(List<User> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream().map(this::getUserVO).collect(Collectors.toList());
+    }
+
 
     @Override
     public User getloginuser(HttpServletRequest request){
@@ -214,6 +211,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         return (User) userObj;
     }
+
+    @Override
+    public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
+        if (userQueryRequest == null) {
+            throw new BesinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = userQueryRequest.getId();
+        String userAccount = userQueryRequest.getAccount();
+        String userName = userQueryRequest.getUsername();
+        String userProfile = userQueryRequest.getUserProfile();
+        String userRole = userQueryRequest.getUserRole();
+        String sortField = userQueryRequest.getSortField();
+        String sortOrder = userQueryRequest.getSortOrder();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(ObjUtil.isNotNull(id), "id", id);
+        queryWrapper.eq(StrUtil.isNotBlank(userRole), "userRole", userRole);
+        queryWrapper.like(StrUtil.isNotBlank(userAccount), "account", userAccount);
+        queryWrapper.like(StrUtil.isNotBlank(userName), "username", userName);
+        queryWrapper.like(StrUtil.isNotBlank(userProfile), "userProfile", userProfile);
+//        判断升序还是降序
+        queryWrapper.orderBy(StrUtil.isNotEmpty(sortField), sortOrder.equals("ascend"), sortField);
+        return queryWrapper;
+    }
+
 
     /**
      * 用户脱敏

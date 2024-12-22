@@ -1,12 +1,18 @@
 package com.example.intelligentbibackend.exception;
 
 import com.example.intelligentbibackend.common.ErrorCode;
+import lombok.Getter;
+
+import java.io.Serial;
 
 /**
  * 业务异常类(接口错误返回时抛一个异常)
  */
 
+@Getter
 public class BesinessException extends RuntimeException{
+    @Serial
+    private static final long serialVersionUID = 1201767062283762959L;
     private final int code;
     private final String description;
 
@@ -28,11 +34,4 @@ public class BesinessException extends RuntimeException{
         this.description = description;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }

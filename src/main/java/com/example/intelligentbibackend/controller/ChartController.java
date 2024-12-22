@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.intelligentbibackend.common.BaseResponse;
+import com.example.intelligentbibackend.common.DeleteRequest;
 import com.example.intelligentbibackend.common.ErrorCode;
 import com.example.intelligentbibackend.common.ResultUtils;
 
@@ -16,7 +17,6 @@ import com.example.intelligentbibackend.manager.RedisLimiterManager;
 import com.example.intelligentbibackend.model.domain.Chart;
 import com.example.intelligentbibackend.model.domain.User;
 import com.example.intelligentbibackend.model.request.chart.ChartQueryRequest;
-import com.example.intelligentbibackend.model.request.chart.ChartDeleteRequest;
 import com.example.intelligentbibackend.model.request.chart.GenChartByAiRequest;
 import com.example.intelligentbibackend.model.vo.BiResponse;
 import com.example.intelligentbibackend.mq.BIMessageProducer;
@@ -39,7 +39,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
 @RequestMapping("/chart")
-@CrossOrigin(origins = {"http://localhost:5176"},allowCredentials = "true")
+//@CrossOrigin(origins = {"http://localhost:5176"},allowCredentials = "true")
 @Slf4j
 public class ChartController {
 
@@ -409,12 +409,13 @@ public class ChartController {
         }
         User loginUser = userService.getloginuser(request);
         chartQueryRequest.setUserId(loginUser.getId());
+//        chartQueryRequest.setAvatarUrl(loginUser.getAvatarUrl());
         long current = chartQueryRequest.getCurrent();
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
 //        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         if (size>20){
-            throw new BesinessException(ErrorCode.PARAMS_ERROR);
+            throw new BesinessException(ErrorCode.PARAMS_ERROR, "每页最多20条");
         }
         Page<Chart> chartPage = chartService.page(new Page<>(current, size),
                 getQueryWrapper(chartQueryRequest));
@@ -461,8 +462,8 @@ public class ChartController {
      * 3. 删除
      */
     @PostMapping("/delete")
-    public  BaseResponse<Boolean> deleteChart(@RequestBody ChartDeleteRequest chartDeleteRequest, HttpServletRequest request) {
-        Long id = chartDeleteRequest.getId();
+    public  BaseResponse<Boolean> deleteChart(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        Long id = deleteRequest.getId();
         if (id == null) {
             throw new BesinessException(ErrorCode.NULL_ERROR);
         }

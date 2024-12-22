@@ -22,7 +22,7 @@ public class Chart implements Serializable {
      *  加上这个注解代表将后端的这个东西在返回给前端的时候从long属性变成字符串
      */
     @TableId(type = IdType.ASSIGN_ID)
-    @JsonSerialize(using = ToStringSerializer.class)
+//    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -57,7 +57,7 @@ public class Chart implements Serializable {
     /**
      * userID
      */
-    @JsonSerialize(using = ToStringSerializer.class)
+//    @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;
     /**
      * 创建时间

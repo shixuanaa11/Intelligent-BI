@@ -20,7 +20,7 @@ public class ChartQueryRequest extends PageRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = -472328972874752720L;
 
-    @JsonSerialize(using = ToStringSerializer.class)
+//    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     /**
      * 名称
@@ -41,9 +41,13 @@ public class ChartQueryRequest extends PageRequest implements Serializable {
     /**
      * userID
      */
-    @JsonSerialize(using = ToStringSerializer.class)
+//    @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;
 
+    /**
+     * 用户头像
+     */
+//    private String avatarUrl;
 
 
 }

@@ -1,9 +1,14 @@
 package com.example.intelligentbibackend.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.intelligentbibackend.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.intelligentbibackend.model.request.user.UserQueryRequest;
 import com.example.intelligentbibackend.model.vo.LoginUserVO;
+import com.example.intelligentbibackend.model.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 /**
 * @author HYR
@@ -21,6 +26,8 @@ public interface UserService extends IService<User> {
      */
 
     long userRegister(String account, String password, String checkPassword);
+
+    String getEncryptPassword(String password);
 
     /**
      * 用户登录接口
@@ -40,42 +47,6 @@ public interface UserService extends IService<User> {
 
     int userLogout(HttpServletRequest request);
 
-    //    @Override
-//
-//    public int updateUser(User user) {
-//
-//        long id = user.getId();
-//        if (id <=0){
-//            throw new BesinessException(ErrorCode.PARAMS_ERROR);
-//        }
-////       判断用户是否为管理员或者要修改的用户是否为当前用户，如果都不是的话就无权限
-////        if (!isAdmin(loginuser) && id != loginuser.getId()) {
-////            throw new BesinessException(ErrorCode.NO_PERMISSION);
-////        }
-//        //            通过id找数据库里面的对应数据
-//        Manageruser searchuser = userMapper.selectById(id);
-//        if (searchuser == null) {
-//            throw new BesinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
-//        }
-//        return userMapper.updateById(manageruser);
-//
-//    }
-//    @Override
-//    public List<Manageruser> searchUser(Manageruser manageruser) {
-//        QueryWrapper<Manageruser> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.like(StringUtils.isNotBlank(manageruser.getUsername()),"username", manageruser.getUsername())
-//                .like(StringUtils.isNotBlank(manageruser.getAccount()),"account", manageruser.getAccount())
-//                .eq(manageruser.getGender()>0,"gender",manageruser.getGender())
-//                .eq(manageruser.getStatus()>0,"status",manageruser.getStatus())
-//                .eq(manageruser.getUserRole()>0,"userRole",manageruser.getUserRole())
-//                .like(StringUtils.isNotBlank(manageruser.getPhone()),"phone",manageruser.getPhone());
-//
-////       最后还有一个时间
-////        queryWrapper.between("createTime", manageruser.getCreateTime());
-//        List<Manageruser> userlist = userMapper.selectList(queryWrapper);
-//        return userlist;
-//
-//    }
 
     /**
      * 获取session的用户信息
@@ -83,6 +54,14 @@ public interface UserService extends IService<User> {
      * @return
      */
     User getloginuser(HttpServletRequest request);
+
+    /**
+     * 将用户变成queryWrapper类型
+     * @param userQueryRequest
+     * @return
+     */
+
+    QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
     /**
      * 脱敏用户信息
@@ -96,5 +75,19 @@ public interface UserService extends IService<User> {
      * 判断用户是否为管理员
      */
     boolean isAdmin(User user);
+
+    /**
+     * 管理员获取用户信息
+     * @param user
+     * @return
+     */
+    UserVO getUserVO(User user);
+
+    /**
+     * 管理员获取用户列表
+     * @param userList
+     * @return
+     */
+    List<UserVO> getUserVOList(List<User> userList);
 
 }

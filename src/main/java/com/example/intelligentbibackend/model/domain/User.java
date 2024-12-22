@@ -20,7 +20,7 @@ public class User implements Serializable {
      * id
      */
     @TableId(type = IdType.ASSIGN_ID)
-    @JsonSerialize(using = ToStringSerializer.class)
+//    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -52,6 +52,10 @@ public class User implements Serializable {
      * 角色 user/admin
      */
     private String userRole;
+    /**
+     * 编辑时间
+     */
+    private Date editTime;
 
     /**
      * 创建时间
@@ -63,6 +67,10 @@ public class User implements Serializable {
      */
     private Date updateTime;
 
+    /**
+     * 用户简介
+     */
+    private String userProfile;
     /**
      * 是否删除
      */

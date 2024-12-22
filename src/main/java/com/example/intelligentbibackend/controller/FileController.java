@@ -1,6 +1,7 @@
 package com.example.intelligentbibackend.controller;
 
 
+import com.example.intelligentbibackend.annotation.AuthCheck;
 import com.example.intelligentbibackend.common.BaseResponse;
 import com.example.intelligentbibackend.common.ErrorCode;
 import com.example.intelligentbibackend.common.ResultUtils;
@@ -37,6 +38,7 @@ public class FileController {
      */
 //    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @PostMapping("/test/upload")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<String> testUploadFile(@RequestPart("file") MultipartFile multipartFile) {
         // 文件目录
         String filename = multipartFile.getOriginalFilename();
@@ -71,6 +73,7 @@ public class FileController {
      */
 //    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @GetMapping("/test/download/")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public void testDownloadFile(String filepath, HttpServletResponse response) throws IOException {
         COSObjectInputStream cosObjectInput = null;
         try {

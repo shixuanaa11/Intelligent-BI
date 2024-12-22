@@ -9,9 +9,11 @@
             <result property="username" column="username" jdbcType="VARCHAR"/>
             <result property="account" column="account" jdbcType="VARCHAR"/>
             <result property="avatarUrl" column="avatarUrl" jdbcType="VARCHAR"/>
+        <result property="userProfile" column="userProfile" jdbcType="VARCHAR"/>
             <result property="gender" column="gender" jdbcType="TINYINT"/>
             <result property="password" column="password" jdbcType="VARCHAR"/>
             <result property="userRole" column="userRole" jdbcType="VARCHAR"/>
+        <result property="editTime" column="editTime" jdbcType="TIMESTAMP"/>
             <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
@@ -20,7 +22,7 @@
     <sql id="Base_Column_List">
         id,username,account,
         avatarUrl,gender,password,
-        userRole,createTime,updateTime,
+        userRole,createTime,updateTime,editTime,userProfile
         isDelete
     </sql>
 </mapper>

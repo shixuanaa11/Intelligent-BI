@@ -1,6 +1,8 @@
 package com.example.intelligentbibackend.controller;
 
 import cn.hutool.json.JSONUtil;
+import com.example.intelligentbibackend.annotation.AuthCheck;
+import com.example.intelligentbibackend.constant.UserConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +31,7 @@ public class QueueController {
     private ThreadPoolExecutor threadPoolExecutor;
 
     @GetMapping("/add")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     // 接收一个参数name，然后将任务添加到线程池中
     public void add(String name) {
         // 使用CompletableFuture运行一个异步任务
@@ -46,6 +49,8 @@ public class QueueController {
     }
 
     @GetMapping("/get")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+
     // 该方法返回线程池的状态信息
     public String get() {
         // 创建一个HashMap存储线程池的状态信息

@@ -20,7 +20,7 @@ public class ChartEditRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = -472328972874752720L;
 
-    @JsonSerialize(using = ToStringSerializer.class)
+//    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**

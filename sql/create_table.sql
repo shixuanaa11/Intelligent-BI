@@ -1,17 +1,19 @@
 -- auto-generated definition
 create table user
 (
-    id         bigint auto_increment comment 'id'
+    id          bigint auto_increment comment 'id'
         primary key,
-    username   varchar(256)                           null comment '用户名',
-    account    varchar(256)                           null comment '账号',
-    avatarUrl  varchar(1024)                          null comment '用户头像',
-    gender     tinyint                                null comment '性别',
-    password   varchar(512)                           not null comment '密码',
-    userRole   varchar(256) default 'user'            not null comment '角色 user/admin',
-    createTime datetime     default CURRENT_TIMESTAMP null comment '创建时间',
-    updateTime datetime     default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
-    isDelete   tinyint      default 0                 not null comment '是否删除'
+    username    varchar(256)                           null comment '用户名',
+    account     varchar(256)                           null comment '账号',
+    avatarUrl   varchar(1024)                          null comment '用户头像',
+    gender      tinyint                                null comment '性别',
+    password    varchar(512)                           not null comment '密码',
+    userRole    varchar(256) default 'user'            not null comment '角色 user/admin',
+    createTime  datetime     default CURRENT_TIMESTAMP null comment '创建时间',
+    editTime    datetime     default CURRENT_TIMESTAMP null comment '编辑时间',
+    updateTime  datetime     default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete    tinyint      default 0                 not null comment '是否删除',
+    userProfile varchar(512)                           null comment '用户简介'
 )
     comment '用户表' collate = utf8mb4_general_ci;
 
@@ -38,27 +40,48 @@ create table chart
     comment '图表表';
 
 -- 图片表
-create table if not exists picture
+create table picture
 (
-    id           bigint auto_increment comment 'id' primary key,
-    url          varchar(512)                       not null comment '图片 url',
-    name         varchar(128)                       not null comment '图片名称',
-    introduction varchar(512)                       null comment '简介',
-    category     varchar(64)                        null comment '分类',
-    tags         varchar(512)                      null comment '标签（JSON 数组）',
-    picSize      bigint                             null comment '图片体积',
-    picWidth     int                                null comment '图片宽度',
-    picHeight    int                                null comment '图片高度',
-    picScale     double                             null comment '图片宽高比例',
-    picFormat    varchar(32)                        null comment '图片格式',
-    userId       bigint                             not null comment '创建用户 id',
-    createTime   datetime default CURRENT_TIMESTAMP not null comment '创建时间',
-    editTime     datetime default CURRENT_TIMESTAMP not null comment '编辑时间',
-    updateTime   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
-    isDelete     tinyint  default 0                 not null comment '是否删除',
-    INDEX idx_name (name),                 -- 提升基于图片名称的查询性能
-    INDEX idx_introduction (introduction), -- 用于模糊搜索图片简介
-    INDEX idx_category (category),         -- 提升基于分类的查询性能
-    INDEX idx_tags (tags),                 -- 提升基于标签的查询性能
-    INDEX idx_userId (userId)              -- 提升基于用户 ID 的查询性能
-) comment '图片' collate = utf8mb4_unicode_ci;
+    id            bigint auto_increment comment 'id'
+        primary key,
+    url           varchar(512)                       not null comment '图片 url',
+    name          varchar(128)                       not null comment '图片名称',
+    introduction  varchar(512)                       null comment '简介',
+    category      varchar(64)                        null comment '分类',
+    tags          varchar(512)                       null comment '标签（JSON 数组）',
+    picSize       bigint                             null comment '图片体积',
+    picWidth      int                                null comment '图片宽度',
+    picHeight     int                                null comment '图片高度',
+    picScale      double                             null comment '图片宽高比例',
+    picFormat     varchar(32)                        null comment '图片格式',
+    userId        bigint                             not null comment '创建用户 id',
+    createTime    datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    editTime      datetime default CURRENT_TIMESTAMP not null comment '编辑时间',
+    updateTime    datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete      tinyint  default 0                 not null comment '是否删除',
+    reviewStatus  int      default 0                 not null comment '审核状态：0-待审核; 1-通过; 2-拒绝',
+    reviewMessage varchar(512)                       null comment '审核信息',
+    reviewerId    bigint                             null comment '审核人 ID',
+    reviewTime    datetime                           null comment '审核时间'
+)
+    comment '图片' collate = utf8mb4_unicode_ci;
+
+create index idx_category
+    on picture (category);
+
+create index idx_introduction
+    on picture (introduction);
+
+create index idx_name
+    on picture (name);
+
+create index idx_reviewStatus
+    on picture (reviewStatus);
+
+create index idx_tags
+    on picture (tags);
+
+create index idx_userId
+    on picture (userId);
+
+

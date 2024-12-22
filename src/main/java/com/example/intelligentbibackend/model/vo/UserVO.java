@@ -1,22 +1,18 @@
 package com.example.intelligentbibackend.model.vo;
 
-import java.io.Serializable;
-import java.util.Date;
 import lombok.Data;
 
-/**
- * 已登录用户视图（脱敏）
- *
- *
- **/
+import java.io.Serializable;
+import java.util.Date;
+
 @Data
-public class LoginUserVO implements Serializable {
+public class UserVO implements Serializable {
 
     /**
-     * 用户 id
+     * id
      */
     private Long id;
-
+    
     /**
      * 账号
      */
@@ -32,26 +28,25 @@ public class LoginUserVO implements Serializable {
      */
     private String avatarUrl;
 
-
     /**
-     * 用户角色：user/admin/ban
+     * 用户简介
      */
-    private String userRole;
+    private String userProfile;
+
     /**
      * 性别
      */
     private Integer gender;
 
     /**
+     * 用户角色：user/admin
+     */
+    private String userRole;
+
+    /**
      * 创建时间
      */
     private Date createTime;
-
-    /**
-     * 用户简介
-     */
-    private String userProfile;
-
     /**
      * 更新时间
      */
