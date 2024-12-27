@@ -9,9 +9,18 @@
           </div></a-col
         >
         <a-col flex="auto"
-          ><a-menu :selectedKeys="[route.path]" mode="horizontal" :style="{ lineHeight: '64px' }">
-            <a-menu-item key="/home" @click="changeMenu('home')">
+          ><a-menu
+            v-model:selectedKeys="selectedKeys"
+            mode="horizontal"
+            :style="{ lineHeight: '64px' }"
+            :items="filterMenusResult"
+            @click="doMenuClick"
+          >
+            <!-- <a-menu-item key="/home" @click="changeMenu('home')">
               <span>主页</span>
+            </a-menu-item>
+            <a-menu-item key="/add_picture" @click="changeMenu('add_picture')">
+              <span>创建图片</span>
             </a-menu-item>
             <a-menu-item key="/chart" @click="changeMenu('chart')">
               <span>智能分析</span>
@@ -22,12 +31,15 @@
             <a-menu-item key="/mychart" @click="changeMenu('mychart')">
               <span>图表管理</span>
             </a-menu-item>
+            <a-menu-item key="/admin/userManager" @click="changeMenu('admin/userManager')">
+              <span>用户管理</span>
+            </a-menu-item>
             <a-menu-item key="/my" @click="changeMenu('my')">
               <span>我的</span>
-            </a-menu-item>
+            </a-menu-item> -->
           </a-menu></a-col
         >
-        <a-col flex="90px">
+        <a-col flex="120px">
           <a-button type="primary" v-if="!userStore.userInfo?.id" @click="tologin">登录</a-button>
           <a-dropdown :arrow="{ pointAtCenter: true }" placement="bottom" v-else>
             <a class="ant-dropdown-link" @click.prevent>
@@ -75,12 +87,12 @@
   </a-layout>
 </template>
 <script setup>
-import { onMounted, ref } from 'vue'
-const selectedKeys = ref(['/home'])
+import { computed, onMounted, ref } from 'vue'
+const selectedKeys = ref([])
 // 路由
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 const router = useRouter()
-const route = useRoute()
+// const route = useRoute()
 // 路由变量
 // import { routes } from '@/router/routes'
 // const menuRouter = ref([routes[0].children])
@@ -89,23 +101,89 @@ const route = useRoute()
 //   console.log('菜单切换', key)
 // }
 // 接口
-import { UserlLogout } from '@/api/user'
+import { UserlLogout } from '@/myapi/user'
 // pinia
 import { useUserStore } from '@/stores/user'
 import { message } from 'ant-design-vue'
+import ACCESS_ENUM from '@/access/accessEnum'
 const userStore = useUserStore()
 
+// 菜单(这里我们规定key以admin开头的菜单为管理员菜单，普通用户登录是看不到的)
+const items = ref([
+  {
+    key: 'home',
+    // icon: () => h(MailOutlined),
+    label: '主页',
+    title: '主页',
+  },
+  {
+    key: 'add_picture',
+    label: '创建图片',
+    title: '创建图片',
+  },
+  {
+    key: 'chart',
+    label: '智能分析',
+    title: '智能分析',
+  },
+  {
+    key: 'chartAsync',
+    label: '异步分析',
+    title: '异步分析',
+  },
+  {
+    key: 'mychart',
+    // icon: () => h(MailOutlined),
+    label: '图表管理',
+    title: '图表管理',
+  },
+  {
+    key: 'adminPictureManager',
+    label: '图片管理',
+    title: '图片管理',
+  },
+  {
+    key: 'adminUserManager',
+    // icon: () => h(MailOutlined),
+    label: '用户管理',
+    title: '用户管理',
+  },
+  {
+    key: 'my',
+    // icon: () => h(MailOutlined),
+    label: '我的',
+    title: '我的',
+  },
+])
+
 // 切换菜单
-const changeMenu = (path) => {
-  console.log(path)
-  console.log(route.path)
-  router.push({ name: path })
+const doMenuClick = ({ key }) => {
+  router.push({ name: key })
 }
 // 路由更新时自动更新选中的菜单项
 router.afterEach((to) => {
   console.log('菜单更新', to)
 
-  selectedKeys.value = [to.path]
+  selectedKeys.value = [to.name]
+})
+// 根据权限过滤菜单项
+const filterMenus = (menus) => {
+  return menus?.filter((menu) => {
+    // 如果菜单以admin开头
+    if (menu.key.startsWith('admin')) {
+      // 获取pinia里的用户信息
+      // 如果用户信息不存在,或者存在了但userRole不是管理员,就返回false,不显示这个菜单
+      const loginUser = useUserStore().userInfo
+      if (!loginUser || loginUser.userRole !== 'admin') {
+        return false
+      }
+    }
+    return true
+  })
+}
+// 写完方法，我们来引用，过滤原始的菜单项(有变化都要重新过滤一次用computed)
+const filterMenusResult = computed(() => {
+  return filterMenus(items.value)
 })
 // 跳转登录页
 const tologin = () => {
@@ -117,8 +195,10 @@ const logout = async () => {
   if (res.code === 0) {
     message.success('注销成功')
     // 清空用户信息
-    userStore.SET_USERINFO({})
+    userStore.SET_USERINFO({ userRole: ACCESS_ENUM.NOT_LOGIN })
     router.push({ name: 'login' })
+  } else {
+    message.error('退出登录失败')
   }
 }
 // 头像

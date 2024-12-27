@@ -70,7 +70,7 @@ import { UploadOutlined } from '@ant-design/icons-vue'
 import { Divider, message } from 'ant-design-vue'
 import Genchart from '@/components/chart.vue'
 // 接口
-import { genChartByAi } from '@/api/chart'
+import { genChartByAi } from '@/myapi/chart'
 // pinia
 import { useChartStore } from '@/stores/chart'
 import { storeToRefs } from 'pinia'

@@ -79,7 +79,7 @@ import { message } from 'ant-design-vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 // 登录接口
-import { UserLogin } from '@/api/user'
+import { UserLogin } from '@/myapi/user'
 // pinia
 import { useUserStore } from '@/stores/user'
 const userStore = useUserStore()
@@ -138,16 +138,6 @@ const handleSubmit = async () => {
   } catch (error) {
     loginBtn.value = false
   }
-
-  // 错误的时候就传请求出现错误
-  // requestFailed (err){
-  //     this.isLoginError = true
-  //     this.$notification['error']({
-  //       message: '错误',
-  //       description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
-  //       duration: 4
-  //     })
-  //   }
 }
 </script>
 

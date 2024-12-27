@@ -62,7 +62,7 @@ import { UploadOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
 // 接口
-import { genChartByAiAsync } from '@/api/chart'
+import { genChartByAiAsync } from '@/myapi/chart'
 // pinia
 // import { useChartStore } from '@/stores/chart'
 // import { storeToRefs } from 'pinia'

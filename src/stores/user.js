@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { GetLoginUserInfo } from '@/api/user'
+import { GetLoginUserInfo } from '@/myapi/user'
 import ACCESS_ENUM from '@/access/accessEnum'
 export const useUserStore = defineStore('user', () => {
   const Token = ref('')
@@ -17,7 +17,7 @@ export const useUserStore = defineStore('user', () => {
     const res = await GetLoginUserInfo()
     console.log('获取用户信息')
     // 如果登录成功，将用户信息存储到本地
-    if (res.code == 0 && res.data.data) {
+    if (res.code == 0 && res.data) {
       SET_USERINFO(res.data)
     } else {
       // 如果登录失败，也将用户信息设置为未登录，表示你已经尝试执行过登录了

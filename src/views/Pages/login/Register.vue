@@ -122,7 +122,7 @@
 import { ref } from 'vue'
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
 // 接口
-import { UserRegister } from '@/api/user'
+import { UserRegister } from '@/myapi/user'
 import { message, notification } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 // 路由

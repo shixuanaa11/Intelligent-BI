@@ -9,7 +9,7 @@ export const routes = [
       {
         path: '/home',
         name: 'home',
-        component: () => import('@/views/Pages/home.vue'),
+        component: () => import('@/views/Pages/homePage.vue'),
       },
       {
         path: '/chart',
@@ -36,6 +36,42 @@ export const routes = [
         meta: {
           access: ACCESS_ENUM.USER,
         },
+      },
+      {
+        path: '/add_picture',
+        name: 'add_picture',
+        component: () => import('@/views/Pages/picture/AddPicturePage.vue'),
+      },
+      // 指定id的图片详情页，通过props页面间传递id
+      {
+        path: '/picture/:id',
+        name: 'picture',
+        component: () => import('@/views/Pages/picture/PictureDetailPage.vue'),
+        props: true,
+        meta: {
+          access: ACCESS_ENUM.USER,
+        },
+      },
+      {
+        path: '/admin/userManager',
+        name: 'adminUserManager',
+        component: () => import('@/views/Pages/admin/UserManagerPage.vue'),
+        meta: {
+          access: ACCESS_ENUM.ADMIN,
+        },
+      },
+      {
+        path: '/admin/pictureManager',
+        name: 'adminPictureManager',
+        component: () => import('@/views/Pages/admin/PictureManagerPage.vue'),
+        meta: {
+          access: ACCESS_ENUM.ADMIN,
+        },
+      },
+      {
+        path: '/add_picture/batch',
+        name: 'add_picture_Batch',
+        component: () => import('@/views/Pages/picture/AddPictureBetchPage.vue'),
       },
     ],
   },

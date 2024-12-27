@@ -57,6 +57,7 @@
                 height: 300px;
                 margin-bottom: 16px;
                 overflow: hidden; /* 防止内容被裁剪 */
+                object-fit: cover;
               "
               :option="chartOption(item)"
               :auto-resize="true"
@@ -92,32 +93,27 @@
   </a-list>
 </template>
 <script setup>
-import { listMyChartByPage, deleteChart } from '@/api/chart'
+import { listMyChartByPage, deleteChart } from '@/myapi/chart'
 import { message, Modal } from 'ant-design-vue'
 import { EllipsisOutlined } from '@ant-design/icons-vue'
-import { nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 
-const chartData = ref({
-  current: 0,
-  pageSize: 0,
-  sortField: '',
-  sortOrder: '',
-  id: 0,
-  name: '',
-  goal: '',
-  chartType: '',
-  userId: 0,
+const chartData = reactive({
+  current: 1,
+  pageSize: 6,
+  sortField: 'createTime',
+  sortOrder: 'descend',
 })
 
 const resChartData = ref([])
-const pageTotal = ref(0)
+const pageTotal = ref()
 
 // 列表加载
 const listLoading = ref(false)
 const loadData = async () => {
   listLoading.value = true
   try {
-    const res = await listMyChartByPage(chartData.value)
+    const res = await listMyChartByPage({ ...chartData })
     console.log('图表列表', res)
     listLoading.value = false
 
@@ -145,12 +141,21 @@ onBeforeUnmount(() => {
 
 // 列表组件属性
 
-const pagination = {
-  onChange: (page) => {
-    console.log(page)
-  },
-  pageSize: 4,
-}
+const pagination = computed(() => {
+  return {
+    current: chartData.current ?? 1,
+    pageSize: chartData.pageSize ?? 10,
+    total: pageTotal.value,
+    showSizeChanger: true,
+    pageSizeOptions: ['6', '12', '18'],
+    showTotal: (total) => `共 ${total} 条`,
+    onChange: (page, pageSize) => {
+      chartData.current = page
+      chartData.pageSize = pageSize
+      loadData()
+    },
+  }
+})
 // 图表
 import VChart from 'vue-echarts'
 import JscodeModel from '@/components/jscodeModel.vue'
